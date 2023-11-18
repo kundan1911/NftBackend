@@ -22,8 +22,41 @@ db.once("open", function () {
   console.log("Connected successfully");
 });
 
+ 
+const calculateExpiryDate=(selectedOption)=> {
+  const currentDate = new Date();
+  
+  // Define the time duration based on the selected option
+  let timeDuration;
+  switch (selectedOption) {
+    case '1 day':
+      timeDuration = 1;
+      break;
+    case '3 days':
+      timeDuration = 3;
+      break;
+    case '7 days':
+      timeDuration = 7;
+      break;
+    case '15 days':
+      timeDuration = 15;
+      break;
+    default:
+      // Handle default case or provide a default duration
+      timeDuration = 1;
+  }
+      const expiryDate = new Date(currentDate);
+      expiryDate.setDate(currentDate.getDate() + timeDuration);
+    
+      // Return the formatted expiry date
+      const formattedExpiryDate =" "+ `${expiryDate.getDate()}/${expiryDate.getMonth() + 1}/${expiryDate.getFullYear()}`;
+      console.log(formattedExpiryDate)
+      return formattedExpiryDate;
+  }
+
 const postSchema = new mongoose.Schema({
-  data: String,
+  SenderNft: String,
+  ReceiverNft:String,
   expiryDate: String,
   imageUrl1: String,
   imageUrl2: String,
@@ -39,12 +72,15 @@ app.use(bodyParser.json());
 app.post('/savePostData', async (req, res) => {
   try {
     // Extract data from the request body
-    const { data, expiryDate, imageUrl1, imageUrl2 } = req.body;
-
+    const { SenderNft,ReceiverNft, expiryDate, imageUrl1, imageUrl2 } = req.body;
+    console.log(req.body)
     // Create a new Post document
+    const expyDate=calculateExpiryDate(expiryDate)
+    console.log(expyDate)
     const newPost = new Post({
-      data,
-      expiryDate,
+      SenderNft,
+      ReceiverNft,
+      expiryDate: expyDate,
       imageUrl1,
       imageUrl2,
     });
