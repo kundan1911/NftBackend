@@ -62,9 +62,18 @@ const postSchema = new mongoose.Schema({
   imageUrl2: String,
 });
 
+const orderSchema = new mongoose.Schema({
+  orderId: String,
+  signedOrder:String,
+  takerData:String,
+  makerAddr:String,
+  makerNftImg:String,
+  takerAddr: String,
+  takerNftImg:String
+});
 // Create a model based on the schema
 const Post = mongoose.model('Post', postSchema);
-
+const Order = mongoose.model('Order', orderSchema);
 // Middleware to parse JSON in the request body
 app.use(bodyParser.json());
 
@@ -95,6 +104,33 @@ app.post('/savePostData', async (req, res) => {
   }
 });
 
+app.post('/saveSignedOrders', async (req, res) => {
+  try {
+    // Extract data from the request body
+    const { orderId,signedOrder,takerData,makerAddr,makerNftImg,takerAddr,takerNftImg } = req.body;
+    console.log(req.body)
+    // Create a new Post document
+    const newPost = new Order({
+      orderId,
+      signedOrder,
+      takerData,
+      makerAddr,
+      makerNftImg,
+      takerAddr,
+takerNftImg
+    });
+
+    // Save the post to the database
+    await newPost.save();
+
+    res.status(201).json({ message: 'order data saved successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 // Route to display all post data
 app.get('/displayPostData', async (req, res) => {
   try {
@@ -109,6 +145,21 @@ app.get('/displayPostData', async (req, res) => {
   }
 });
 
+
+// Route to display all order data
+app.get('/displayOrderData', async (req, res) => {
+  try {
+    // Retrieve all posts from the database
+    console.log("displayOrderData")
+    const orders = await Order.find();
+
+    // Send the posts as JSON response
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 app.get("/getnfts", async (req, res) => {
   try {
