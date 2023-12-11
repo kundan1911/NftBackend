@@ -60,6 +60,7 @@ const postSchema = new mongoose.Schema({
   expiryDate: String,
   imageUrl1: String,
   imageUrl2: String,
+  chainId:Number
 });
 
 const orderSchema = new mongoose.Schema({
@@ -81,7 +82,7 @@ app.use(bodyParser.json());
 app.post('/savePostData', async (req, res) => {
   try {
     // Extract data from the request body
-    const { SenderNft,ReceiverNft, expiryDate, imageUrl1, imageUrl2 } = req.body;
+    const { SenderNft,ReceiverNft, expiryDate, imageUrl1, imageUrl2,chainId } = req.body;
     console.log(req.body)
     // Create a new Post document
     const expyDate=calculateExpiryDate(expiryDate)
@@ -92,6 +93,7 @@ app.post('/savePostData', async (req, res) => {
       expiryDate: expyDate,
       imageUrl1,
       imageUrl2,
+      chainId
     });
 
     // Save the post to the database
@@ -145,6 +147,22 @@ app.get('/displayPostData', async (req, res) => {
   }
 });
 
+app.get('/displayChainIdPost', async (req, res) => {
+  try {
+    // Retrieve all posts from the database
+    const { chainId } = req.query;
+    const posts = await Post.find({ chainId: Number(chainId) });
+ // Check if chainId is provided in the query
+ if (!chainId) {
+  return res.status(400).json({ error: 'chainId parameter is missing' });
+}
+    // Send the posts as JSON response
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 // Route to display all order data
 app.get('/displayOrderData', async (req, res) => {
