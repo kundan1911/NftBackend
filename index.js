@@ -65,8 +65,10 @@ const postSchema = new mongoose.Schema({
 
 const orderSchema = new mongoose.Schema({
   orderId: String,
+  chainId:Number,
   signedOrder:String,
   takerData:String,
+  makerData:String,
   makerAddr:String,
   makerNftImg:String,
   takerAddr: String,
@@ -109,13 +111,15 @@ app.post('/savePostData', async (req, res) => {
 app.post('/saveSignedOrders', async (req, res) => {
   try {
     // Extract data from the request body
-    const { orderId,signedOrder,takerData,makerAddr,makerNftImg,takerAddr,takerNftImg } = req.body;
+    const { orderId,chainId,signedOrder,takerData,makerData,makerAddr,makerNftImg,takerAddr,takerNftImg } = req.body;
     console.log(req.body)
     // Create a new Post document
     const newPost = new Order({
       orderId,
+      chainId,
       signedOrder,
       takerData,
+      makerData,
       makerAddr,
       makerNftImg,
       takerAddr,
