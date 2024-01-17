@@ -74,9 +74,18 @@ const orderSchema = new mongoose.Schema({
   takerAddr: String,
   takerNftImg:String
 });
+
+const userAccountsScheme = new mongoose.Schema({
+  username: String,
+  email:String,
+  walletAddr:String,
+  bio:String,
+  
+});
 // Create a model based on the schema
 const Post = mongoose.model('Post', postSchema);
 const Order = mongoose.model('Order', orderSchema);
+const User = mongoose.model('Users', userAccountsScheme);
 // Middleware to parse JSON in the request body
 app.use(bodyParser.json());
 
@@ -102,6 +111,51 @@ app.post('/savePostData', async (req, res) => {
     await newPost.save();
 
     res.status(201).json({ message: 'Post data saved successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+app.post('/createUserAccount', async (req, res) => {
+  try {
+    // Extract data from the request body
+    const { username,email,walletAddr, bio } = req.body;
+    console.log(req.body)
+    // Create a new user document
+    const newUser = new User({
+     username,
+     email,
+     walletAddr,
+     bio  
+    });
+
+    // Save the post to the database
+    await newUser.save();
+
+    res.status(201).json({ message: 'new user created successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+app.get('/getUserAccountDetail', async (req, res) => {
+  try {
+    // Extract data from the request body
+    const { walletAddr } = req.query;
+    console.log("getuserAcc")
+    console.log(req.query)
+  
+    const user = await User.find({ walletAddr:walletAddr });
+    // if(user.length===0){
+    //   console.log(user)
+    //   res.status(200).json({"newuser":true});
+    // }
+    console.log(user)
+    res.status(200).json(user);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -142,7 +196,7 @@ app.get('/displayPostData', async (req, res) => {
   try {
     // Retrieve all posts from the database
     const posts = await Post.find();
-
+    console.log(posts)
     // Send the posts as JSON response
     res.status(200).json(posts);
   } catch (error) {
@@ -155,11 +209,15 @@ app.get('/displayChainIdPost', async (req, res) => {
   try {
     // Retrieve all posts from the database
     const { chainId } = req.query;
+
+// Check if chainId is provided in the query
+    if (!chainId) {
+      return res.status(400).json({ error: 'chainId parameter is missing' });
+    }
+
     const posts = await Post.find({ chainId: Number(chainId) });
- // Check if chainId is provided in the query
- if (!chainId) {
-  return res.status(400).json({ error: 'chainId parameter is missing' });
-}
+ 
+
     // Send the posts as JSON response
     res.status(200).json(posts);
   } catch (error) {
